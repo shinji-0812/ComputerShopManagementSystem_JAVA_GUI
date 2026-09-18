@@ -23,7 +23,7 @@ public class Database {
                 );
             }
 
-            System.out.println("Database connected!");
+
 
         } catch (SQLException e) {
 
