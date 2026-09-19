@@ -306,7 +306,7 @@ public class Login extends JFrame {
 
         ImageIcon original =
             new ImageIcon(
-                "images/user2.png"
+                "images/Logo.png"
             );
 
         Image image =

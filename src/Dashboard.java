@@ -63,6 +63,10 @@ public class Dashboard extends JFrame {
         });
     }
 
+
+
+
+
     public Dashboard(String username) {
 
         Logout logout = new Logout(this);
@@ -95,19 +99,44 @@ public class Dashboard extends JFrame {
         title.setOpaque(false);
 
         JLabel main_title = new JLabel(
-            "COMPUTER SHOP",
-            SwingConstants.CENTER
+            "COMPUTER SHOP"
+        );
+        JLabel sub_title = new JLabel(
+            "MANAGEMENT SYSTEM"
         );
 
+
         main_title.setForeground(
-            new Color(0x22D3EE)
+            Color.WHITE
         );
 
         main_title.setFont(
-            new Font("Arial", Font.BOLD, 15)
+            new Font("Arial", Font.BOLD, 8)
+        );
+
+
+        sub_title.setForeground(
+            new Color(0x22D3EE)
+        );
+
+        sub_title.setFont(
+            new Font("Arial", Font.BOLD, 10)
+        );
+
+        title.setLayout(
+            new BoxLayout(title, BoxLayout.Y_AXIS)
+        );
+        title.setBorder(
+            BorderFactory.createEmptyBorder(
+                10,
+                10,
+                10,
+                10
+            )
         );
 
         title.add(main_title);
+        title.add(sub_title);
 
         sidebar.add(title);
 
@@ -525,18 +554,7 @@ public class Dashboard extends JFrame {
 
             button.setBackground(null);
         }
-
-        button.setForeground(
-            new Color(0xCBD5E1)
-        );
-
-        button.setFont(
-            new Font(
-                "Arial",
-                Font.BOLD,
-                14
-            )
-        );
+        String currentButtonText = "Dashboard";
 
         button.setOpaque(true);
         button.setContentAreaFilled(true);
@@ -546,6 +564,35 @@ public class Dashboard extends JFrame {
         button.setPreferredSize(
             new Dimension(50, 50)
         );
+
+        if(button.getText().equals(currentButtonText)) {
+
+            button.setBackground(
+                new Color(0x386641)
+            );
+
+            roundedButton(button, 20);
+
+            button.setForeground(
+                new Color(0x22D3EE)
+            );
+        }
+        else{
+            button.setForeground(
+                    new Color(0xCBD5E1)
+                );
+
+            button.setFont(
+                new Font(
+                    "Arial",
+                    Font.BOLD,
+                    14
+                    )
+                );
+        }
+
+
+
 
         button.addMouseListener(
             new MouseAdapter() {
@@ -564,7 +611,16 @@ public class Dashboard extends JFrame {
                             new Color(0xDC2626)
                         );
 
-                    } else {
+                    }
+
+                    else if(button.getText().equals(currentButtonText)) {
+
+                            button.setBackground(
+                                new Color(0x386641)
+                            );
+                    }
+                    
+                    else {
 
                         button.setBackground(
                             new Color(0x1E1B4B)
@@ -590,7 +646,17 @@ public class Dashboard extends JFrame {
                             Color.RED
                         );
 
-                    } else {
+                    }
+                    else if(button.getText().equals(currentButtonText)) {
+
+                        button.setBackground(
+                            new Color(0x386641)
+                        );
+
+                    }
+
+                    
+                    else {
 
                         button.setBackground(null);
                     }
@@ -624,7 +690,7 @@ public class Dashboard extends JFrame {
 
         card.setBorder(
             BorderFactory.createLineBorder(
-                new Color(0x312E81),
+                new Color(0x22007c),
                 1
             )
         );
@@ -670,6 +736,46 @@ public class Dashboard extends JFrame {
 
         return card;
     }
+
+     public void roundedButton(JButton button, int radius) {
+
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setOpaque(false);
+
+        button.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
+
+            @Override
+            public void paint(Graphics g, JComponent c) {
+
+                Graphics2D g2 = (Graphics2D) g.create();
+
+                g2.setRenderingHint(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON
+                );
+
+                // Button background
+                g2.setColor(button.getBackground());
+
+                g2.fillRoundRect(
+                    0,
+                    0,
+                    button.getWidth(),
+                    button.getHeight(),
+                    radius,
+                    radius
+                );
+
+                // Button text
+                super.paint(g2, c);
+
+                g2.dispose();
+            }
+        });
+    }
+
 
     public static void main(String[] args) {
 
