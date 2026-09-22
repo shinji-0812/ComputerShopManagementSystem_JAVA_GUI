@@ -147,20 +147,11 @@ public class Database {
     }
 
     public boolean logout() {
-
-        String sql =
-            "UPDATE users SET IsLogIn = 0 WHERE IsLogIn = 1";
-
+        String sql = "UPDATE users SET IsLogIn = 0 WHERE IsLogIn = 1";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-
             int rows = statement.executeUpdate();
-
             username = null;
-
-
-
             return rows > 0;
-
         } catch (SQLException e) {
 
             return false;
