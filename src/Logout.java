@@ -1,3 +1,5 @@
+import javax.swing.JOptionPane;
+
 public class Logout {
 
     private Dashboard dashboard;
@@ -12,19 +14,18 @@ public class Logout {
     public void log_out() {
 
         dashboard.logoutButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                dashboard,
+                "Are you sure you want to log out?",
+                "Confirm Logout",
+                JOptionPane.YES_NO_OPTION);
+                if (confirm == JOptionPane.YES_OPTION && data.logout()) {
 
-            if (data.logout()) {
+                    dashboard.dispose();
 
-                dashboard.dispose();
+                    Dashboard.start();
 
-                Dashboard.start();
-
-            } else {
-
-                System.out.println(
-                    "Logout failed!"
-                );
-            }
+                }
         });
     }
 }

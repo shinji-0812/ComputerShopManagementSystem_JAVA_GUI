@@ -7,12 +7,16 @@ public class Dashboard extends JFrame {
 
     public JButton dashboardButton = new JButton("Dashboard");
     public JButton productsButton = new JButton("Products");
-    public JButton inventoryButton = new JButton("Inventory");
     public JButton salesButton = new JButton("Sales");
     public JButton customersButton = new JButton("Customers");
-    public JButton ordersButton = new JButton("Orders");
     public JButton reportsButton = new JButton("Reports");
     public JButton logoutButton = new JButton("Logout");
+
+    private JButton activeButton = dashboardButton;
+    private JPanel contentPanel;
+    private JPanel dashboardContent;
+
+    private String currentTitle = "Dashboard";
 
     public static void start() {
 
@@ -64,9 +68,6 @@ public class Dashboard extends JFrame {
     }
 
 
-
-
-
     public Dashboard(String username) {
 
         Logout logout = new Logout(this);
@@ -77,6 +78,7 @@ public class Dashboard extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+
 
         JPanel sidebar = new JPanel();
 
@@ -92,6 +94,7 @@ public class Dashboard extends JFrame {
             new GridLayout(10, 1, 0, 5)
         );
 
+
         JPanel title = new JPanel(
             new GridBagLayout()
         );
@@ -101,6 +104,7 @@ public class Dashboard extends JFrame {
         JLabel main_title = new JLabel(
             "COMPUTER SHOP"
         );
+
         JLabel sub_title = new JLabel(
             "MANAGEMENT SYSTEM"
         );
@@ -123,9 +127,11 @@ public class Dashboard extends JFrame {
             new Font("Arial", Font.BOLD, 10)
         );
 
+
         title.setLayout(
             new BoxLayout(title, BoxLayout.Y_AXIS)
         );
+
         title.setBorder(
             BorderFactory.createEmptyBorder(
                 10,
@@ -135,10 +141,12 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         title.add(main_title);
         title.add(sub_title);
 
         sidebar.add(title);
+
 
         styleButton(dashboardButton);
 
@@ -152,6 +160,7 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         styleButton(productsButton);
 
         productsButton.setIcon(
@@ -164,17 +173,6 @@ public class Dashboard extends JFrame {
             )
         );
 
-        styleButton(inventoryButton);
-
-        inventoryButton.setIcon(
-            new ImageIcon(
-                resize(
-                    new ImageIcon(
-                        "images/Nav_pics/Inventory.png"
-                    )
-                )
-            )
-        );
 
         styleButton(salesButton);
 
@@ -188,6 +186,7 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         styleButton(customersButton);
 
         customersButton.setIcon(
@@ -200,17 +199,6 @@ public class Dashboard extends JFrame {
             )
         );
 
-        styleButton(ordersButton);
-
-        ordersButton.setIcon(
-            new ImageIcon(
-                resize(
-                    new ImageIcon(
-                        "images/Nav_pics/Orders.png"
-                    )
-                )
-            )
-        );
 
         styleButton(reportsButton);
 
@@ -223,6 +211,7 @@ public class Dashboard extends JFrame {
                 )
             )
         );
+
 
         styleButton(logoutButton);
 
@@ -238,20 +227,27 @@ public class Dashboard extends JFrame {
 
         logoutButton.setBackground(Color.RED);
 
+
         sidebar.add(dashboardButton);
         sidebar.add(productsButton);
-        sidebar.add(inventoryButton);
         sidebar.add(salesButton);
         sidebar.add(customersButton);
-        sidebar.add(ordersButton);
         sidebar.add(reportsButton);
 
-        JPanel gap = new JPanel();
+        JPanel gap1 = new JPanel();
+        JPanel gap2 = new JPanel();
+        JPanel gap3 = new JPanel();
 
-        gap.setOpaque(false);
+        gap3.setOpaque(false);
+        gap1.setOpaque(false);
+        gap2.setOpaque(false);
 
-        sidebar.add(gap);
+        sidebar.add(gap1);
+        sidebar.add(gap2);
+        sidebar.add(gap3);
+
         sidebar.add(logoutButton);
+
 
         JPanel mainPanel = new JPanel() {
 
@@ -284,9 +280,11 @@ public class Dashboard extends JFrame {
             }
         };
 
+
         mainPanel.setLayout(
             new BorderLayout()
         );
+
 
         JPanel header =
             new JPanel(
@@ -301,22 +299,26 @@ public class Dashboard extends JFrame {
             new Dimension(0, 65)
         );
 
-        JLabel dashboardTitle =
+        // ==========HEADER TITLE CHANGE========================================
+        JLabel upperTitle =
             new JLabel(
-                "  Dashboard"
+                "  " + currentTitle
             );
 
-        dashboardTitle.setForeground(
+        // =====================================================================
+
+        upperTitle.setForeground(
             new Color(0xE2E8F0)
         );
 
-        dashboardTitle.setFont(
+        upperTitle.setFont(
             new Font(
                 "Arial",
                 Font.BOLD,
                 28
             )
         );
+
 
         JLabel admin =
             new JLabel(username);
@@ -352,10 +354,12 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         header.add(
-            dashboardTitle,
+            upperTitle,
             BorderLayout.WEST
         );
+
 
         JPanel rightPanel =
             new JPanel(
@@ -367,6 +371,7 @@ public class Dashboard extends JFrame {
             );
 
         rightPanel.setOpaque(false);
+
 
         JButton settings =
             new JButton();
@@ -398,6 +403,7 @@ public class Dashboard extends JFrame {
         settings.setBorderPainted(false);
         settings.setFocusPainted(false);
 
+
         settings.addMouseListener(
             new MouseAdapter() {
 
@@ -417,6 +423,7 @@ public class Dashboard extends JFrame {
                     );
                 }
 
+
                 @Override
                 public void mouseExited(
                     MouseEvent e
@@ -435,6 +442,7 @@ public class Dashboard extends JFrame {
             }
         );
 
+
         rightPanel.add(admin);
         rightPanel.add(settings);
 
@@ -443,10 +451,12 @@ public class Dashboard extends JFrame {
             BorderLayout.EAST
         );
 
+
         mainPanel.add(
             header,
             BorderLayout.NORTH
         );
+
 
         JPanel cards =
             new JPanel();
@@ -460,6 +470,7 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         cards.setBorder(
             BorderFactory.createEmptyBorder(
                 25,
@@ -470,6 +481,7 @@ public class Dashboard extends JFrame {
         );
 
         cards.setOpaque(false);
+
 
         JPanel productCard =
             createCard(
@@ -489,43 +501,354 @@ public class Dashboard extends JFrame {
                 "₱25,450"
             );
 
+
         cards.add(productCard);
         cards.add(orderCard);
         cards.add(salesCard);
 
-        JPanel content =
-            new JPanel();
 
-        content.setBackground(
+        contentPanel =
+            new JPanel(
+                new BorderLayout()
+            );
+
+        contentPanel.setBackground(
             new Color(0x0F172A)
         );
 
-        content.setLayout(
-            new BorderLayout()
+
+        dashboardContent =
+            new JPanel(
+                new BorderLayout()
+            );
+
+        dashboardContent.setBackground(
+            new Color(0x0F172A)
         );
+
+
+        JPanel content =
+            dashboardContent;
 
         content.add(
             cards,
             BorderLayout.NORTH
         );
 
-        mainPanel.add(
+
+        // =====================================================
+        //                    RECENT SALES
+        // =====================================================
+
+        JPanel recentSales =
+            new JPanel();
+
+        recentSales.setBackground(
+            new Color(0x111C3D)
+        );
+
+        recentSales.setLayout(
+            new BorderLayout()
+        );
+
+        recentSales.setBorder(
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(
+                    new Color(0x22007c),
+                    1
+                ),
+                BorderFactory.createEmptyBorder(
+                    15,
+                    20,
+                    15,
+                    20
+                )
+            )
+        );
+
+
+        JLabel recentSalesTitle =
+            new JLabel(
+                "Recent Sales"
+            );
+
+        recentSalesTitle.setForeground(
+            new Color(0xE2E8F0)
+        );
+
+        recentSalesTitle.setFont(
+            new Font(
+                "Arial",
+                Font.BOLD,
+                20
+            )
+        );
+
+        recentSalesTitle.setBorder(
+            BorderFactory.createEmptyBorder(
+                0,
+                0,
+                15,
+                0
+            )
+        );
+
+        recentSales.add(
+            recentSalesTitle,
+            BorderLayout.NORTH
+        );
+
+
+        JPanel salesList =
+            new JPanel();
+
+        salesList.setOpaque(false);
+
+        salesList.setLayout(
+            new BoxLayout(
+                salesList,
+                BoxLayout.Y_AXIS
+            )
+        );
+
+        // ==================SALES TEMPORARY===================================
+
+        salesList.add(
+            createSale(
+                "Gaming Keyboard",
+                "John",
+                "₱1,500",
+                "Today, 2:35 PM"
+            )
+        );
+
+        salesList.add(
+            Box.createVerticalStrut(8)
+        );
+
+
+        salesList.add(
+            createSale(
+                "Wireless Mouse",
+                "Mark",
+                "₱850",
+                "Today, 1:20 PM"
+            )
+        );
+
+        salesList.add(
+            Box.createVerticalStrut(8)
+        );
+
+
+        salesList.add(
+            createSale(
+                "Gaming Headset",
+                "Alex",
+                "₱2,200",
+                "Yesterday, 5:45 PM"
+            )
+        );
+
+        salesList.add(
+            Box.createVerticalStrut(8)
+        );
+
+
+        salesList.add(
+            createSale(
+                "24-inch Monitor",
+                "David",
+                "₱8,500",
+                "Yesterday, 3:15 PM"
+            )
+        );
+
+        salesList.add(
+            Box.createVerticalStrut(8)
+        );
+
+
+        salesList.add(
+            createSale(
+                "24-inch Monitor",
+                "David",
+                "₱8,500",
+                "Yesterday, 3:15 PM"
+            )
+        );
+
+        salesList.add(
+            Box.createVerticalStrut(8)
+        );
+
+
+        salesList.add(
+            createSale(
+                "24-inch Monitor",
+                "David",
+                "₱8,500",
+                "Yesterday, 3:15 PM"
+            )
+        );
+
+        salesList.add(
+            Box.createVerticalStrut(8)
+        );
+
+
+        salesList.add(
+            createSale(
+                "24-inch Monitor",
+                "David",
+                "₱8,500",
+                "Yesterday, 3:15 PM"
+            )
+        );
+
+        // =====================================================
+
+
+            JScrollPane scrollPane = new JScrollPane(salesList);
+
+            scrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
+            );
+
+            scrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            );
+
+            scrollPane.setBorder(null);
+            scrollPane.setOpaque(false);
+            scrollPane.getViewport().setOpaque(false);
+
+            JScrollBar verticalBar =
+                scrollPane.getVerticalScrollBar();
+
+            verticalBar.setPreferredSize(
+                new Dimension(6, 0)
+            );
+
+            verticalBar.setOpaque(false);
+
+            scrollPane.getVerticalScrollBar().setUI(
+                new javax.swing.plaf.basic.BasicScrollBarUI() {
+
+                    @Override
+                    protected void configureScrollBarColors() {
+                        this.thumbColor = new Color(0x22D3EE);
+                        this.trackColor = new Color(0x0F172A);
+                    }
+
+                    @Override
+                    protected JButton createDecreaseButton(int orientation) {
+                        return createZeroButton();
+                    }
+
+                    @Override
+                    protected JButton createIncreaseButton(int orientation) {
+                        return createZeroButton();
+                    }
+
+                    private JButton createZeroButton() {
+                        JButton button = new JButton();
+                        button.setPreferredSize(new Dimension(3, 3));
+                        return button;
+                    }
+                }
+            );
+            
+
+
+        recentSales.add(
+            scrollPane,
+            BorderLayout.CENTER
+        );
+
+
+        // ==========MAIN CONTENT PANEL========================================
+
+        content.add(
+            recentSales,
+            BorderLayout.CENTER
+        );
+
+        contentPanel.add(
             content,
             BorderLayout.CENTER
         );
+
+        mainPanel.add(
+            contentPanel,
+            BorderLayout.CENTER
+        );
+
+
+        productsButton.addActionListener(e -> {
+
+            setActiveButton(
+                productsButton
+            );
+
+            currentTitle = "Products";
+            contentPanel.removeAll();
+            upperTitle.setText(
+                "  " + currentTitle
+            );
+
+            contentPanel.add(
+                new Products(),
+                BorderLayout.CENTER
+            );
+
+
+            contentPanel.revalidate();
+            contentPanel.repaint();
+        });
+
+
+        dashboardButton.addActionListener(e -> {
+
+            setActiveButton(
+                dashboardButton
+            );
+            currentTitle = "Dashboard";
+
+            upperTitle.setText(
+                "  " + currentTitle
+            );
+
+            contentPanel.removeAll();
+
+            contentPanel.add(
+                dashboardContent,
+                BorderLayout.CENTER
+            );
+
+            contentPanel.revalidate();
+            contentPanel.repaint();
+        });
+
+
+        // =====================================================================
+
 
         add(
             sidebar,
             BorderLayout.WEST
         );
 
+
         add(
             mainPanel,
             BorderLayout.CENTER
         );
 
+
         setVisible(true);
     }
+
 
     private Image resize(ImageIcon icon) {
 
@@ -542,19 +865,8 @@ public class Dashboard extends JFrame {
         return resized;
     }
 
+
     private void styleButton(JButton button) {
-
-        if (button.getText().equals("Logout")) {
-
-            button.setBackground(
-                Color.RED
-            );
-
-        } else {
-
-            button.setBackground(null);
-        }
-        String currentButtonText = "Dashboard";
 
         button.setOpaque(true);
         button.setContentAreaFilled(true);
@@ -565,33 +877,62 @@ public class Dashboard extends JFrame {
             new Dimension(50, 50)
         );
 
-        if(button.getText().equals(currentButtonText)) {
+
+        if (
+            button == logoutButton
+        ) {
+
+            button.setBackground(
+                Color.RED
+            );
+
+            button.setForeground(
+                Color.WHITE
+            );
+
+        } else if (
+            button == activeButton
+        ) {
 
             button.setBackground(
                 new Color(0x386641)
             );
 
-            roundedButton(button, 20);
-
             button.setForeground(
                 new Color(0x22D3EE)
             );
-        }
-        else{
-            button.setForeground(
-                    new Color(0xCBD5E1)
-                );
 
             button.setFont(
                 new Font(
                     "Arial",
                     Font.BOLD,
                     14
-                    )
-                );
+                )
+            );
+
+            roundedButton(
+                button,
+                20
+            );
+
+        } else {
+
+            button.setBackground(
+                null
+            );
+
+            button.setForeground(
+                new Color(0xCBD5E1)
+            );
+
+            button.setFont(
+                new Font(
+                    "Arial",
+                    Font.BOLD,
+                    14
+                )
+            );
         }
-
-
 
 
         button.addMouseListener(
@@ -603,34 +944,34 @@ public class Dashboard extends JFrame {
                 ) {
 
                     if (
-                        button.getText()
-                            .equals("Logout")
+                        button == logoutButton
                     ) {
 
                         button.setBackground(
                             new Color(0xDC2626)
                         );
 
-                    }
+                    } else if (
+                        button == activeButton
+                    ) {
 
-                    else if(button.getText().equals(currentButtonText)) {
+                        button.setBackground(
+                            new Color(0x386641)
+                        );
 
-                            button.setBackground(
-                                new Color(0x386641)
-                            );
-                    }
-                    
-                    else {
+                    } else {
 
                         button.setBackground(
                             new Color(0x1E1B4B)
                         );
                     }
 
+
                     button.setForeground(
                         new Color(0x22D3EE)
                     );
                 }
+
 
                 @Override
                 public void mouseExited(
@@ -638,36 +979,56 @@ public class Dashboard extends JFrame {
                 ) {
 
                     if (
-                        button.getText()
-                            .equals("Logout")
+                        button == logoutButton
                     ) {
 
                         button.setBackground(
                             Color.RED
                         );
 
-                    }
-                    else if(button.getText().equals(currentButtonText)) {
+                    } else if (
+                        button == activeButton
+                    ) {
 
                         button.setBackground(
                             new Color(0x386641)
                         );
 
+                    } else {
+
+                        button.setBackground(
+                            null
+                        );
+
+                        button.setForeground(
+                            new Color(0xCBD5E1)
+                        );
                     }
-
-                    
-                    else {
-
-                        button.setBackground(null);
-                    }
-
-                    button.setForeground(
-                        new Color(0xCBD5E1)
-                    );
                 }
             }
         );
     }
+
+
+    private void setActiveButton(
+        JButton button
+    ) {
+
+        activeButton = button;
+
+        styleButton(dashboardButton);
+        styleButton(productsButton);
+        styleButton(salesButton);
+        styleButton(customersButton);
+        styleButton(reportsButton);
+
+        dashboardButton.repaint();
+        productsButton.repaint();
+        salesButton.repaint();
+        customersButton.repaint();
+        reportsButton.repaint();
+    }
+
 
     private JPanel createCard(
         String name,
@@ -677,9 +1038,11 @@ public class Dashboard extends JFrame {
         JPanel card =
             new JPanel();
 
+
         card.setBackground(
             new Color(0x111C3D)
         );
+
 
         card.setLayout(
             new GridLayout(
@@ -688,6 +1051,7 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         card.setBorder(
             BorderFactory.createLineBorder(
                 new Color(0x22007c),
@@ -695,15 +1059,18 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         JLabel nameLabel =
             new JLabel(
                 name,
                 SwingConstants.CENTER
             );
 
+
         nameLabel.setForeground(
             new Color(0x94A3B8)
         );
+
 
         nameLabel.setFont(
             new Font(
@@ -713,15 +1080,18 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         JLabel valueLabel =
             new JLabel(
                 value,
                 SwingConstants.CENTER
             );
 
+
         valueLabel.setForeground(
             new Color(0x22D3EE)
         );
+
 
         valueLabel.setFont(
             new Font(
@@ -731,49 +1101,211 @@ public class Dashboard extends JFrame {
             )
         );
 
+
         card.add(nameLabel);
         card.add(valueLabel);
+
 
         return card;
     }
 
-     public void roundedButton(JButton button, int radius) {
+
+    private JPanel createSale(
+        String product,
+        String customer,
+        String amount,
+        String time
+    ) {
+
+        JPanel sale =
+            new JPanel();
+
+
+        sale.setBackground(
+            new Color(0x0F172A)
+        );
+
+
+        sale.setLayout(
+            new BorderLayout()
+        );
+
+
+        sale.setBorder(
+            BorderFactory.createEmptyBorder(
+                10,
+                15,
+                10,
+                15
+            )
+        );
+
+
+        JLabel productLabel =
+            new JLabel(
+                product
+            );
+
+
+        productLabel.setForeground(
+            new Color(0xE2E8F0)
+        );
+
+
+        productLabel.setFont(
+            new Font(
+                "Arial",
+                Font.BOLD,
+                15
+            )
+        );
+
+
+        JLabel infoLabel =
+            new JLabel(
+                customer + "  •  " + time
+            );
+
+
+        infoLabel.setForeground(
+            new Color(0x94A3B8)
+        );
+
+
+        infoLabel.setFont(
+            new Font(
+                "Arial",
+                Font.PLAIN,
+                12
+            )
+        );
+
+
+        JPanel info =
+            new JPanel();
+
+
+        info.setOpaque(false);
+
+
+        info.setLayout(
+            new BoxLayout(
+                info,
+                BoxLayout.Y_AXIS
+            )
+        );
+
+
+        info.add(
+            productLabel
+        );
+
+
+        info.add(
+            Box.createVerticalStrut(4)
+        );
+
+
+        info.add(
+            infoLabel
+        );
+
+
+        JLabel amountLabel =
+            new JLabel(
+                amount
+            );
+
+
+        amountLabel.setForeground(
+            new Color(0x22D3EE)
+        );
+
+
+        amountLabel.setFont(
+            new Font(
+                "Arial",
+                Font.BOLD,
+                16
+            )
+        );
+
+
+        sale.add(
+            info,
+            BorderLayout.WEST
+        );
+
+
+        sale.add(
+            amountLabel,
+            BorderLayout.EAST
+        );
+
+
+        return sale;
+    }
+
+
+    public void roundedButton(
+        JButton button,
+        int radius
+    ) {
 
         button.setFocusPainted(false);
         button.setBorderPainted(false);
         button.setContentAreaFilled(false);
         button.setOpaque(false);
 
-        button.setUI(new javax.swing.plaf.basic.BasicButtonUI() {
 
-            @Override
-            public void paint(Graphics g, JComponent c) {
+        button.setUI(
+            new javax.swing.plaf.basic.BasicButtonUI() {
 
-                Graphics2D g2 = (Graphics2D) g.create();
+                @Override
+                public void paint(
+                    Graphics g,
+                    JComponent c
+                ) {
 
-                g2.setRenderingHint(
-                    RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON
-                );
+                    Graphics2D g2 =
+                        (Graphics2D) g.create();
 
-                // Button background
-                g2.setColor(button.getBackground());
 
-                g2.fillRoundRect(
-                    0,
-                    0,
-                    button.getWidth(),
-                    button.getHeight(),
-                    radius,
-                    radius
-                );
+                    g2.setRenderingHint(
+                        RenderingHints.KEY_ANTIALIASING,
+                        RenderingHints.VALUE_ANTIALIAS_ON
+                    );
 
-                // Button text
-                super.paint(g2, c);
 
-                g2.dispose();
+                    // Button background
+
+                    g2.setColor(
+                        button.getBackground()
+                    );
+
+
+                    g2.fillRoundRect(
+                        0,
+                        0,
+                        button.getWidth(),
+                        button.getHeight(),
+                        radius,
+                        radius
+                    );
+
+
+                    // Button text
+
+                    super.paint(
+                        g2,
+                        c
+                    );
+
+
+                    g2.dispose();
+                }
             }
-        });
+        );
     }
 
 
