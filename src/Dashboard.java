@@ -17,6 +17,7 @@ public class Dashboard extends JFrame {
     private JPanel dashboardContent;
 
     private String currentTitle = "Dashboard";
+    private final Database db;
 
     public static void start() {
 
@@ -31,7 +32,7 @@ public class Dashboard extends JFrame {
 
             login.dispose();
 
-            new Dashboard(data.getusername());
+            new Dashboard(data.getusername(), data);
 
             return;
         }
@@ -42,11 +43,21 @@ public class Dashboard extends JFrame {
 
             if (login.loginButtonActionPerformed()) {
 
-                login.dispose();
+                String username = login.usernameField.getText().trim();
+                String password = new String(login.passwordField.getPassword());
 
-                new Dashboard(
-                    login.usernameField.getText()
-                );
+                // Authenticate using the SAME Database object passed to Dashboard.
+                // This lets Database retain the logged-in user's ID for product operations.
+                if (!data.checkLogin(username, password)) {
+                    JOptionPane.showMessageDialog(
+                        login,
+                        "Login succeeded in the login window, but the database session could not be restored."
+                    );
+                    return;
+                }
+
+                login.dispose();
+                new Dashboard(username, data);
 
             } else {
 
@@ -68,7 +79,9 @@ public class Dashboard extends JFrame {
     }
 
 
-    public Dashboard(String username) {
+    public Dashboard(String username, Database db) {
+
+        this.db = db;
 
         Logout logout = new Logout(this);
         logout.log_out();
@@ -798,7 +811,7 @@ public class Dashboard extends JFrame {
             );
 
             contentPanel.add(
-                new Products(),
+                new Products(db),
                 BorderLayout.CENTER
             );
 
@@ -830,6 +843,23 @@ public class Dashboard extends JFrame {
             contentPanel.repaint();
         });
 
+        salesButton.addActionListener(e -> {
+
+            setActiveButton(
+                salesButton
+            );
+
+            currentTitle = "Sales";
+            contentPanel.removeAll();
+            upperTitle.setText(
+                "  " + currentTitle
+            );
+
+            contentPanel.add(
+                new Sales(),
+                BorderLayout.CENTER
+            );
+        });
 
         // =====================================================================
 
