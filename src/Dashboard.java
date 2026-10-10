@@ -8,7 +8,7 @@ public class Dashboard extends JFrame {
     public JButton dashboardButton = new JButton("Dashboard");
     public JButton productsButton = new JButton("Products");
     public JButton salesButton = new JButton("Sales");
-    public JButton customersButton = new JButton("Customers");
+
     public JButton reportsButton = new JButton("Reports");
     public JButton logoutButton = new JButton("Logout");
 
@@ -200,17 +200,7 @@ public class Dashboard extends JFrame {
         );
 
 
-        styleButton(customersButton);
 
-        customersButton.setIcon(
-            new ImageIcon(
-                resize(
-                    new ImageIcon(
-                        "images/Nav_pics/Customer.png"
-                    )
-                )
-            )
-        );
 
 
         styleButton(reportsButton);
@@ -244,20 +234,22 @@ public class Dashboard extends JFrame {
         sidebar.add(dashboardButton);
         sidebar.add(productsButton);
         sidebar.add(salesButton);
-        sidebar.add(customersButton);
         sidebar.add(reportsButton);
 
         JPanel gap1 = new JPanel();
         JPanel gap2 = new JPanel();
         JPanel gap3 = new JPanel();
+        JPanel gap4 = new JPanel(); 
 
         gap3.setOpaque(false);
         gap1.setOpaque(false);
         gap2.setOpaque(false);
+        gap4.setOpaque(false);
 
         sidebar.add(gap1);
         sidebar.add(gap2);
         sidebar.add(gap3);
+        sidebar.add(gap4);
 
         sidebar.add(logoutButton);
 
@@ -856,7 +848,24 @@ public class Dashboard extends JFrame {
             );
 
             contentPanel.add(
-                new Sales(),
+                new Sales(db),
+                BorderLayout.CENTER
+            );
+        });
+
+        reportsButton.addActionListener(e -> {
+            setActiveButton(
+                reportsButton
+            );
+
+            currentTitle = "Reports";
+            contentPanel.removeAll();
+            upperTitle.setText(
+                "  " + currentTitle
+            );
+
+            contentPanel.add(
+                new Reports(db),
                 BorderLayout.CENTER
             );
         });
@@ -1049,13 +1058,13 @@ public class Dashboard extends JFrame {
         styleButton(dashboardButton);
         styleButton(productsButton);
         styleButton(salesButton);
-        styleButton(customersButton);
+
         styleButton(reportsButton);
 
         dashboardButton.repaint();
         productsButton.repaint();
         salesButton.repaint();
-        customersButton.repaint();
+
         reportsButton.repaint();
     }
 

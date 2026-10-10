@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+
 public class Products extends JPanel {
 
     private final Color BACKGROUND = new Color(0x0F172A);
@@ -100,7 +101,7 @@ public class Products extends JPanel {
         tools.add(searchField, BorderLayout.CENTER);
 
         categoryBox = new JComboBox<>(new String[] {
-                "All Categories", "Keyboard", "Mouse", "Audio", "Monitor", "Graphics Card"
+                "All Categories", "Keyboard", "Mouse", "Audio", "Monitor", "Graphics Card", "CPU", "Motherboard", "RAM", "Storage", "Power Supply", "Case"
         });
         categoryBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         categoryBox.setBackground(PANEL);
@@ -299,10 +300,16 @@ public class Products extends JPanel {
     private String iconFor(String category) {
         switch (category) {
             case "Keyboard": return "⌨";
-            case "Mouse": return "🖱";
+            case "Mouse": return "🖱";  
             case "Audio": return "🎧";
             case "Monitor": return "🖥";
             case "Graphics Card": return "▰";
+            case "CPU": return "🔲";
+            case "Motherboard": return "📟";
+            case "RAM": return "💾";
+            case "Storage": return "💿";
+            case "Power Supply": return "🔌";
+            case "Case": return "🖥";
             default: return "□";
         }
     }
@@ -320,6 +327,8 @@ public class Products extends JPanel {
                 "Are you sure you want to delete\n" + product.name + "?",
                 "Delete Product", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (result == JOptionPane.YES_OPTION) {
+
+            db.deleteProduct(product.name);
             products.remove(index);
             refreshCards();
         }
@@ -342,7 +351,7 @@ public class Products extends JPanel {
 
         JTextField nameField = new JTextField();
         JComboBox<String> categoryField = new JComboBox<>(new String[] {
-                "Keyboard", "Mouse", "Audio", "Monitor", "Graphics Card"
+                "Keyboard", "Mouse", "Audio", "Monitor", "Graphics Card","CPU", "Motherboard", "RAM", "Storage", "Power Supply", "Case"
         });
         JTextField priceField = new JTextField();
         JTextField stockField = new JTextField();
@@ -419,38 +428,93 @@ public class Products extends JPanel {
 
                 
                 if (!editing) {
-                    boolean success = db.addProduct(
+                    if(products.stream().anyMatch(p -> p.name.equalsIgnoreCase(name) && p.category.equalsIgnoreCase(selectedCategory))) {
+                        
+                        JOptionPane.showMessageDialog(
+                                dialog,
+                                "This product already exists."
+                        );
+                        
+
+
+                        return;
+                    }
+
+
+
+                    db.addProduct(
                             name,
                             selectedCategory,
                             price,
                             stock
                     );
 
-                    if (!success) {
+                }
+
+                              
+                if (editing) {
+
+                    // Get the original product before changing its name.
+                    Product oldProduct = products.get(index);
+                    String oldName = oldProduct.name;
+
+                    // Prevent duplicate product names in the same category.
+                    boolean duplicate = products.stream().anyMatch(p ->
+                        !p.name.equalsIgnoreCase(oldName)
+                        && p.name.equalsIgnoreCase(name)
+                        && p.category.equalsIgnoreCase(selectedCategory)
+                    );
+
+                    if (duplicate) {
                         JOptionPane.showMessageDialog(
-                                dialog,
-                                "Failed to save product. Check Database.java " +
-                                "and the Eclipse Console for the actual SQL error.",
-                                "Database Error",
-                                JOptionPane.ERROR_MESSAGE
+                            dialog,
+                            "This product already exists."
                         );
                         return;
                     }
 
-                }
+                    boolean success = db.updateProduct(
+                        oldName,
+                        name,
+                        selectedCategory,
+                        price,
+                        stock
+                    );
 
-                
-                Product updated =
-                        new Product(name, selectedCategory, price, stock);
+                    if (!success) {
+                        JOptionPane.showMessageDialog(
+                            dialog,
+                            "Failed to update product. Please try again."
+                        );
+                        return;
+                    }
 
-                if (editing) {
-                    products.set(index, updated);
+                    products.set(index,
+                        new Product(name, selectedCategory, price, stock));
+
                 } else {
-                    products.add(updated);
+
+                    if (products.stream().anyMatch(p ->
+                        p.name.equalsIgnoreCase(name)
+                        && p.category.equalsIgnoreCase(selectedCategory)
+                    )) {
+                        JOptionPane.showMessageDialog(
+                            dialog,
+                            "This product already exists."
+                        );
+                        return;
+                    }
+
+                    db.addProduct(name, selectedCategory, price, stock);
+
+                    products.add(
+                        new Product(name, selectedCategory, price, stock)
+                    );
                 }
 
                 refreshCards();
                 dialog.dispose();
+
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(
