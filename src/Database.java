@@ -58,6 +58,8 @@ public class Database {
 
             }
 
+            
+
 
 
         } catch (SQLException e) {
@@ -160,6 +162,77 @@ public class Database {
 
             return productSales;
         }
+    
+
+    public boolean usernameChange(String newUsername) {
+
+        String sql = """
+            UPDATE users
+            SET username = ?
+            WHERE id = ?
+            """;
+
+        try (PreparedStatement statement =
+                connection.prepareStatement(sql)) {
+
+            statement.setString(1, newUsername);
+            statement.setInt(2, getUserId());
+
+            int rowsUpdated = statement.executeUpdate();
+
+            if (rowsUpdated > 0) {
+                this.username = newUsername;
+                return true;
+            }
+
+            return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean passwordChange(String newpassword){
+        String sql = """
+                UPDATE users SET password = ? WHERE id = ?
+                """;
+        try(PreparedStatement statement = connection.prepareStatement(sql)){
+            statement.setString(1, newpassword);
+            statement.setInt(2, getUserId());
+
+            int rowsUpdated = statement.executeUpdate();
+
+            if(rowsUpdated > 0){
+                return true;
+            }
+        return false;
+
+            
+        }catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    public boolean cancelSale(String saleId) {
+        String sql = "UPDATE salesHistory SET status = 'Canceled' WHERE sale_id = ? AND user_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, saleId);
+            statement.setInt(2, getUserId());
+
+            int rows = statement.executeUpdate();
+
+            return rows > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 
     public int productSold(){
         int productsSold = 0;
@@ -280,22 +353,7 @@ public class Database {
         }
     }
 
-    public boolean cancelSale(String saleId) {
-        String sql = "UPDATE salesHistory SET status = 'Canceled' WHERE sale_id = ? AND user_id = ?";
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, saleId);
-            statement.setInt(2, getUserId());
-
-            int rows = statement.executeUpdate();
-
-            return rows > 0;
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
 
     public boolean stockIncrease(String name, int stock_available) {
 
@@ -387,16 +445,18 @@ public class Database {
     }
 
     public boolean deleteProduct(String name) {
-        String sql = "DELETE FROM products WHERE name = ? AND user_id = ?";
+        String sql = """
+            DELETE FROM products
+            WHERE name = ? AND user_id = ?
+            """;
 
         try (PreparedStatement statement =
                 connection.prepareStatement(sql)) {
 
             statement.setString(1, name);
             statement.setInt(2, getUserId());
-            int rows = statement.executeUpdate();
 
-            return rows > 0;
+            return statement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -477,18 +537,27 @@ public class Database {
     public ArrayList<Product> getProducts() {
         ArrayList<Product> productList = new ArrayList<>();
 
-        String sql = "SELECT name, category, price, quantity FROM products";
+        String sql = """
+            SELECT name, category, price, quantity
+            FROM products
+            WHERE user_id = ?
+            ORDER BY product_id DESC
+            """;
 
-        try (PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet rs = statement.executeQuery()) {
+        try (PreparedStatement statement =
+                connection.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                String name = rs.getString("name");
-                String category = rs.getString("category");
-                double price = rs.getDouble("price");
-                int stock = rs.getInt("quantity");
+            statement.setInt(1, getUserId());
 
-                productList.add(new Product(name, category, price, stock));
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    productList.add(new Product(
+                        rs.getString("name"),
+                        rs.getString("category"),
+                        rs.getDouble("price"),
+                        rs.getInt("quantity")
+                    ));
+                }
             }
 
         } catch (SQLException e) {
@@ -641,15 +710,47 @@ public class Database {
         }
     }
 
-    public boolean logout() {
-        String sql = "UPDATE users SET IsLogIn = 0 WHERE IsLogIn = 1";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            int rows = statement.executeUpdate();
-            username = null;
-            return rows > 0;
-        } catch (SQLException e) {
 
-            return false;
+
+
+        public boolean logout() {
+
+            if (username == null || username.isBlank()) {
+                System.out.println("Logout failed: username is null or empty.");
+                return false;
+            }
+
+            String sql =
+                "UPDATE users SET IsLogIn = 0 " +
+                "WHERE username = ? AND IsLogIn = 1";
+
+            try (PreparedStatement statement =  
+                    connection.prepareStatement(sql)) {
+
+                statement.setString(1, username);
+
+                int rows = statement.executeUpdate();
+
+                if (rows > 0) {
+                    username = null;
+                    userId = 0;
+
+                    System.out.println("Logout successful.");
+                    return true;
+                }
+
+                System.out.println(
+                    "Logout failed: no logged-in account matched " + username
+                );
+
+                return false;
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
-    }
+
+
+
 }

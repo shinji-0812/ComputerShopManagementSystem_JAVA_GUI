@@ -87,6 +87,8 @@ public class Sales extends JPanel {
 
     private DefaultTableModel tableModel;
 
+    
+
 
 
     public Sales(Database db) {

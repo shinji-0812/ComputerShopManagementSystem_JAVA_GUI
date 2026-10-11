@@ -84,7 +84,7 @@ public class Computes {
 
         ArrayList<String> names = db.getCompletedProductNames();
 
-        // Reset the results
+   
         topfour = new int[4];
         topfourNames = new String[4];
 
@@ -123,7 +123,7 @@ public class Computes {
                 }
             }
 
-            // No more products with completed sales
+
             if (maxIndex == -1) {
                 break;
             }
@@ -134,7 +134,6 @@ public class Computes {
             selected[maxIndex] = true;
         }
 
-        // Copy quantities into the four-item display array
         topProducts = topfour.clone();
     }
 }

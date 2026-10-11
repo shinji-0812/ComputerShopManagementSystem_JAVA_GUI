@@ -18,15 +18,21 @@ public class Dashboard extends JFrame {
 
     private String currentTitle = "Dashboard";
     private final Database db;
+    private JLabel admin;
+    public static Admin user = new Admin("Dave", "1234");
+
+
+    
 
     public static void start() {
 
         Login login = new Login();
         Database data = new Database();
-
-        if (!data.userExists("Dave")) {
-            data.createAccount("Dave", "1234");
+        
+        if (!data.userExists(user.admin_username)) {
+            data.createAccount(user.admin_username, user.password);
         }
+
 
         if (data.IsLogIn()) {
 
@@ -46,8 +52,7 @@ public class Dashboard extends JFrame {
                 String username = login.usernameField.getText().trim();
                 String password = new String(login.passwordField.getPassword());
 
-                // Authenticate using the SAME Database object passed to Dashboard.
-                // This lets Database retain the logged-in user's ID for product operations.
+
                 if (!data.checkLogin(username, password)) {
                     JOptionPane.showMessageDialog(
                         login,
@@ -83,7 +88,7 @@ public class Dashboard extends JFrame {
 
         this.db = db;
 
-        Logout logout = new Logout(this);
+        Logout logout = new Logout(this, db);
         logout.log_out();
 
         setTitle("Computer Shop Management System");
@@ -326,7 +331,9 @@ public class Dashboard extends JFrame {
 
 
         JLabel admin =
-            new JLabel(username);
+            new JLabel(db.getusername());
+
+        this.admin = admin;
 
         ImageIcon icon =
             new ImageIcon(
@@ -343,15 +350,15 @@ public class Dashboard extends JFrame {
                 Image.SCALE_SMOOTH
             );
 
-        admin.setIcon(
+        this.admin.setIcon(
             new ImageIcon(resized)
         );
 
-        admin.setForeground(
+        this.admin.setForeground(
             new Color(0xCBD5E1)
         );
 
-        admin.setFont(
+        this.admin.setFont(
             new Font(
                 "Arial",
                 Font.PLAIN,
@@ -448,7 +455,7 @@ public class Dashboard extends JFrame {
         );
 
 
-        rightPanel.add(admin);
+        rightPanel.add(this.admin);
         rightPanel.add(settings);
 
         header.add(
@@ -574,7 +581,7 @@ public class Dashboard extends JFrame {
 
         JLabel recentSalesTitle =
             new JLabel(
-                "Recent Sales"
+                "Recent Activity"
             );
 
         recentSalesTitle.setForeground(
@@ -869,6 +876,15 @@ public class Dashboard extends JFrame {
                 BorderLayout.CENTER
             );
         });
+
+        
+        settings.addActionListener(e -> {
+            settings settingsWindow = new settings(this, db, user);
+            settingsWindow.setVisible(true);
+        });
+
+
+
 
         // =====================================================================
 
@@ -1346,6 +1362,12 @@ public class Dashboard extends JFrame {
             }
         );
     }
+
+public void refreshDashboard() {
+    admin.setText(db.getusername());
+    admin.revalidate();
+    admin.repaint();
+}
 
 
     public static void main(String[] args) {

@@ -1,5 +1,7 @@
 
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -26,12 +28,20 @@ public class Reports extends JPanel {
     private JLabel productsValue;
     private JLabel averageValue;
 
+    private JPanel main;
+    private JPanel summary;
+    private JPanel bottom;
+    private JPanel categoryPanel;
+
+    private JScrollPane scroll;
+
+    private int lastWidth = -1;
+
     public Reports(Database db) {
 
         this.db = db;
         this.compute = new Computes(db);
 
-        // IMPORTANT: Calculate the data BEFORE displaying it.
         compute.compute();
         compute.topSellingProducts();
 
@@ -39,53 +49,22 @@ public class Reports extends JPanel {
         setBackground(BACKGROUND);
 
         // MAIN CONTENT
-        JPanel main = new JPanel();
+        main = new JPanel();
         main.setLayout(new BoxLayout(main, BoxLayout.Y_AXIS));
         main.setBackground(BACKGROUND);
-        main.setBorder(new EmptyBorder(20, 20, 20, 20));
+        main.setBorder(new EmptyBorder(16, 16, 16, 16));
+        main.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // HEADER
-        JPanel header = new JPanel(new BorderLayout());
-        header.setOpaque(false);
-        header.setMaximumSize(
-            new Dimension(Integer.MAX_VALUE, 55)
-        );
-
-        JPanel heading = new JPanel();
-        heading.setOpaque(false);
-        heading.setLayout(
-            new BoxLayout(heading, BoxLayout.Y_AXIS)
-        );
-
-        JLabel title = new JLabel("Analytics Overview");
-        title.setForeground(WHITE);
-        title.setFont(new Font("Arial", Font.BOLD, 24));
-
-        JLabel subtitle = new JLabel(
-            "Monitor your computer shop performance"
-        );
-        subtitle.setForeground(GRAY);
-        subtitle.setFont(new Font("Arial", Font.PLAIN, 12));
-
-        heading.add(title);
-        heading.add(Box.createVerticalStrut(5));
-        heading.add(subtitle);
-        header.add(heading, BorderLayout.WEST);
-
-        main.add(header);
-        main.add(Box.createVerticalStrut(20));
-
+        // =====================================
         // SUMMARY CARDS
-        JPanel summary = new JPanel(
-            new GridLayout(1, 4, 12, 0)
-        );
+        // =====================================
+
+        summary = new JPanel(new GridLayout(1, 4, 12, 12));
         summary.setOpaque(false);
-        summary.setMaximumSize(
-            new Dimension(Integer.MAX_VALUE, 105)
-        );
+        summary.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         revenueValue = new JLabel(
-            "₱" + String.format("%.2f", compute.totalSales)
+            String.format("₱%,.2f", compute.totalSales)
         );
 
         ordersValue = new JLabel(
@@ -97,69 +76,70 @@ public class Reports extends JPanel {
         );
 
         averageValue = new JLabel(
-            "₱" + String.format("%.2f", compute.averageSales)
+            String.format("₱%,.2f", compute.averageSales)
         );
 
         summary.add(createMetricCard(
-            "Total Revenue", revenueValue,
-            "Revenue from sales", CYAN
+            "Total Revenue",
+            revenueValue,
+            "Revenue from sales",
+            CYAN
         ));
 
         summary.add(createMetricCard(
-            "Completed Orders", ordersValue,
-            "Successful transactions", GREEN
+            "Completed Orders",
+            ordersValue,
+            "Successful transactions",
+            WHITE
         ));
 
         summary.add(createMetricCard(
-            "Products Sold", productsValue,
-            "Total units sold", PURPLE
+            "Products Sold",
+            productsValue,
+            "Total units sold",
+            WHITE
         ));
 
         summary.add(createMetricCard(
-            "Average Order", averageValue,
-            "Revenue per order", YELLOW
+            "Average Order",
+            averageValue,
+            "Revenue per order",
+            YELLOW
         ));
 
         main.add(summary);
         main.add(Box.createVerticalStrut(18));
 
+        // =====================================
         // SALES BY CATEGORY
-        JPanel categoryPanel = createPanel("Sales by Category");
+        // =====================================
+
+        categoryPanel = createPanel("Sales by Category");
 
         categoryPanel.add(
             new CategoryChart(),
             BorderLayout.CENTER
         );
 
+        categoryPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         categoryPanel.setPreferredSize(
-            new Dimension(700, 250)
-        );
-
-        categoryPanel.setMaximumSize(
-            new Dimension(Integer.MAX_VALUE, 250)
+            new Dimension(600, 250)
         );
 
         main.add(categoryPanel);
         main.add(Box.createVerticalStrut(18));
 
-        // BOTTOM SECTION
-        JPanel bottom = new JPanel(
-            new GridLayout(1, 2, 15, 0)
-        );
+        // =====================================
+        // BOTTOM PANELS
+        // =====================================
 
+        bottom = new JPanel(new GridLayout(1, 2, 15, 15));
         bottom.setOpaque(false);
-        bottom.setPreferredSize(
-            new Dimension(700, 210)
-        );
-
-        bottom.setMaximumSize(
-            new Dimension(Integer.MAX_VALUE, 210)
-        );
+        bottom.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // TOP-SELLING PRODUCTS
-        JPanel topProductsPanel = createPanel(
-            "Top-Selling Products"
-        );
+        JPanel topProductsPanel =
+            createPanel("Top-Selling Products");
 
         JPanel productList = new JPanel();
         productList.setOpaque(false);
@@ -174,7 +154,6 @@ public class Reports extends JPanel {
             String productName = compute.topfourNames[i];
             int quantity = compute.topfour[i];
 
-            // Display only valid entries with sales.
             if (productName != null && quantity > 0) {
 
                 hasTopProducts = true;
@@ -194,6 +173,7 @@ public class Reports extends JPanel {
         }
 
         if (!hasTopProducts) {
+
             JLabel noSales = new JLabel(
                 "No completed product sales yet."
             );
@@ -245,12 +225,11 @@ public class Reports extends JPanel {
 
         main.add(bottom);
 
+        // =====================================
         // SCROLL PANE
-        JScrollPane scroll = new JScrollPane(main);
+        // =====================================
 
-        scroll.getVerticalScrollBar().setPreferredSize(
-            new Dimension(7, 0)
-        );
+        scroll = new JScrollPane(main);
 
         scroll.setBorder(null);
         scroll.setBackground(BACKGROUND);
@@ -265,6 +244,9 @@ public class Reports extends JPanel {
         );
 
         scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setPreferredSize(
+            new Dimension(7, 0)
+        );
 
         scroll.getVerticalScrollBar().setUI(
             new javax.swing.plaf.basic.BasicScrollBarUI() {
@@ -299,10 +281,126 @@ public class Reports extends JPanel {
             }
         );
 
+        // RESPOND TO WINDOW RESIZING
+        scroll.getViewport().addComponentListener(
+            new ComponentAdapter() {
+
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    updateResponsiveLayout();
+                }
+            }
+        );
+
         add(scroll, BorderLayout.CENTER);
+
+        // INITIAL LAYOUT
+        SwingUtilities.invokeLater(
+            this::updateResponsiveLayout
+        );
     }
 
-    // METRIC CARD
+    // =====================================
+    // RESPONSIVE LAYOUT
+    // =====================================
+
+    private void updateResponsiveLayout() {
+
+        if (scroll == null || main == null) {
+            return;
+        }
+
+        int viewportWidth =
+            scroll.getViewport().getWidth();
+
+        if (viewportWidth <= 0) {
+            return;
+        }
+
+        if (viewportWidth == lastWidth) {
+            return;
+        }
+
+        lastWidth = viewportWidth;
+
+        int contentWidth = Math.max(120, viewportWidth - 32);
+
+        // SUMMARY CARDS:
+        // Wide window: 4 columns
+        // Medium window: 2 columns
+        // Narrow window: 1 column
+
+        int summaryColumns;
+
+        if (contentWidth >= 1000) {
+            summaryColumns = 4;
+        } else if (contentWidth >= 560) {
+            summaryColumns = 2;
+        } else {
+            summaryColumns = 1;
+        }
+
+        summary.setLayout(
+            new GridLayout(0, summaryColumns, 12, 12)
+        );
+
+        int summaryRows =
+            (int) Math.ceil(4.0 / summaryColumns);
+
+        int summaryHeight =
+            summaryRows * 105 + (summaryRows - 1) * 12;
+
+        summary.setPreferredSize(
+            new Dimension(contentWidth, summaryHeight)
+        );
+
+        summary.setMaximumSize(
+            new Dimension(Integer.MAX_VALUE, summaryHeight)
+        );
+
+
+
+        boolean stackPanels = contentWidth < 700;
+
+        int bottomColumns = stackPanels ? 1 : 2;
+        int bottomRows = stackPanels ? 2 : 1;
+
+        bottom.setLayout(
+            new GridLayout(
+                bottomRows,
+                bottomColumns,
+                15,
+                15
+            )
+        );
+
+        int bottomHeight =
+            bottomRows * 210 + (bottomRows - 1) * 15;
+
+        bottom.setPreferredSize(
+            new Dimension(contentWidth, bottomHeight)
+        );
+
+        bottom.setMaximumSize(
+            new Dimension(Integer.MAX_VALUE, bottomHeight)
+        );
+
+        // Keep the content as wide as the visible viewport.
+        main.setPreferredSize(
+            new Dimension(
+                contentWidth,
+                main.getPreferredSize().height
+            )
+        );
+
+        main.revalidate();
+        main.repaint();
+    }
+
+    // =====================================
+    // SUMMARY CARD
+    // =====================================
+
     private JPanel createMetricCard(
         String name,
         JLabel value,
@@ -311,6 +409,7 @@ public class Reports extends JPanel {
     ) {
 
         JPanel card = new JPanel();
+
         card.setLayout(
             new BoxLayout(card, BoxLayout.Y_AXIS)
         );
@@ -324,22 +423,27 @@ public class Reports extends JPanel {
             )
         );
 
+        card.setMinimumSize(new Dimension(0, 95));
+
         JLabel nameLabel = new JLabel(name);
-        nameLabel.setForeground(GRAY);
+        nameLabel.setForeground(WHITE);
         nameLabel.setFont(
-            new Font("Arial", Font.BOLD, 12)
+            new Font("Arial", Font.BOLD, 11)
         );
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         value.setForeground(accent);
         value.setFont(
-            new Font("Arial", Font.BOLD, 21)
+            new Font("Arial", Font.BOLD, 20)
         );
+        value.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel desc = new JLabel(description);
         desc.setForeground(GRAY);
         desc.setFont(
             new Font("Arial", Font.PLAIN, 10)
         );
+        desc.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         card.add(nameLabel);
         card.add(Box.createVerticalStrut(9));
@@ -350,7 +454,10 @@ public class Reports extends JPanel {
         return card;
     }
 
-    // STANDARD PANEL
+    // =====================================
+    // GENERAL PANEL
+    // =====================================
+
     private JPanel createPanel(String title) {
 
         JPanel panel = new JPanel(
@@ -377,7 +484,10 @@ public class Reports extends JPanel {
         return panel;
     }
 
+    // =====================================
     // TOP-SELLING PRODUCT BAR
+    // =====================================
+
     private JPanel createProductBar(
         String name,
         int quantityValue,
@@ -402,12 +512,12 @@ public class Reports extends JPanel {
             new Font("Arial", Font.PLAIN, 10)
         );
 
-        JPanel labels = new JPanel(new BorderLayout());
+        JPanel labels = new JPanel(new BorderLayout(5, 0));
         labels.setOpaque(false);
-        labels.add(productName, BorderLayout.WEST);
+
+        labels.add(productName, BorderLayout.CENTER);
         labels.add(units, BorderLayout.EAST);
 
-        // Scale bars relative to the largest displayed quantity.
         int maxQuantity = 1;
 
         for (int value : compute.topfour) {
@@ -419,6 +529,7 @@ public class Reports extends JPanel {
         );
 
         JProgressBar bar = new JProgressBar(0, 100);
+
         bar.setValue(barValue);
         bar.setStringPainted(false);
         bar.setForeground(CYAN);
@@ -432,14 +543,17 @@ public class Reports extends JPanel {
         return row;
     }
 
-    // ORDER STATUS
+    // =====================================
+    // ORDER STATISTICS ROW
+    // =====================================
+
     private JPanel createStatusRow(
         String name,
         String count,
         Color color
     ) {
 
-        JPanel row = new JPanel(new BorderLayout());
+        JPanel row = new JPanel(new BorderLayout(8, 0));
         row.setOpaque(false);
 
         JLabel nameLabel = new JLabel(name);
@@ -454,17 +568,19 @@ public class Reports extends JPanel {
             new Font("Arial", Font.BOLD, 16)
         );
 
-        row.add(nameLabel, BorderLayout.WEST);
+        row.add(nameLabel, BorderLayout.CENTER);
         row.add(countLabel, BorderLayout.EAST);
 
         return row;
     }
 
-    // CATEGORY DONUT CHART
+    // =====================================
+    // RESPONSIVE DONUT CHART
+    // =====================================
+
     private class CategoryChart extends JPanel {
 
         private final int[] amounts = compute.finalProductSales;
-
         private final String[] names = compute.productNames;
 
         private final Color[] colors = {
@@ -484,6 +600,7 @@ public class Reports extends JPanel {
         CategoryChart() {
             setOpaque(false);
             setPreferredSize(new Dimension(400, 220));
+            setMinimumSize(new Dimension(100, 180));
         }
 
         @Override
@@ -498,33 +615,83 @@ public class Reports extends JPanel {
                 RenderingHints.VALUE_ANTIALIAS_ON
             );
 
-            int diameter = Math.min(
-                160,
-                Math.max(100, getHeight() - 10)
-            );
+            int width = getWidth();
+            int height = getHeight();
 
-            int x = 8;
-            int y = (getHeight() - diameter) / 2;
-
-            int start = 90;
-
-            for (int i = 0; i < amounts.length; i++) {
-
-                int angle = amounts[i] * 360 / 100;
-
-                if (angle > 0) {
-                    g2.setColor(colors[i]);
-
-                    g2.fillArc(
-                        x, y, diameter, diameter,
-                        start, -angle
-                    );
-                }
-
-                start -= angle;
+            if (width <= 0 || height <= 0) {
+                g2.dispose();
+                return;
             }
 
-            // DONUT HOLE
+
+
+            long total = 0;
+
+            for (int amount : amounts) {
+                if (amount > 0) {
+                    total += amount;
+                }
+            }
+
+            // Responsive donut size
+            int diameter = Math.min(
+                160,
+                Math.min(height - 20, Math.max(70, width / 3))
+            );
+
+            diameter = Math.max(50, diameter);
+
+            int x = 8;
+            int y = Math.max(0, (height - diameter) / 2);
+
+            // Draw donut slices
+            int start = 90;
+            int usedAngle = 0;
+
+            if (total > 0) {
+
+                for (int i = 0; i < amounts.length; i++) {
+
+                    if (amounts[i] <= 0) {
+                        continue;
+                    }
+
+                    int angle;
+
+                    if (i == amounts.length - 1) {
+                        angle = 360 - usedAngle;
+                    } else {
+                        angle = (int) Math.round(
+                            amounts[i] * 360.0 / total
+                        );
+                    }
+
+                    angle = Math.min(angle, 360 - usedAngle);
+
+                    if (angle > 0) {
+
+                        g2.setColor(colors[i % colors.length]);
+
+                        g2.fillArc(
+                            x,
+                            y,
+                            diameter,
+                            diameter,
+                            start,
+                            -angle
+                        );
+
+                        start -= angle;
+                        usedAngle += angle;
+                    }
+                }
+            } else {
+
+                g2.setColor(BORDER);
+                g2.fillOval(x, y, diameter, diameter);
+            }
+
+            // Donut hole
             int hole = diameter / 2;
 
             g2.setColor(PANEL);
@@ -540,30 +707,83 @@ public class Reports extends JPanel {
             int legendX = x + diameter + 12;
             int legendY = Math.max(15, y + 5);
 
-            g2.setFont(new Font("Arial", Font.PLAIN, 10));
+            g2.setFont(
+                new Font("Arial", Font.PLAIN, 10)
+            );
+
+            FontMetrics metrics = g2.getFontMetrics();
+
+            int availableWidth = Math.max(
+                0,
+                width - legendX - 35
+            );
 
             for (int i = 0; i < names.length; i++) {
 
-                int yy = legendY + i * 17;
-
-                // Do not draw beyond the visible chart area.
-                if (yy > getHeight() - 5) {
+                if (i >= amounts.length) {
                     break;
                 }
 
-                g2.setColor(colors[i]);
+                int yy = legendY + i * 17;
+
+                // Do not draw beyond the chart's visible area.
+                if (yy > height - 5) {
+                    break;
+                }
+
+                g2.setColor(colors[i % colors.length]);
 
                 g2.fillRoundRect(
-                    legendX, yy - 7, 9, 9, 3, 3
+                    legendX,
+                    yy - 7,
+                    9,
+                    9,
+                    3,
+                    3
                 );
 
                 g2.setColor(WHITE);
-                g2.drawString(names[i], legendX + 15, yy + 1);
+
+                String name = names[i] == null
+                    ? "Unknown"
+                    : names[i];
+
+                // Shorten long names to fit the chart.
+                String displayName = name;
+
+                while (
+                    !displayName.isEmpty()
+                    && metrics.stringWidth(displayName) > availableWidth
+                ) {
+                    displayName = displayName.substring(
+                        0,
+                        displayName.length() - 1
+                    );
+                }
+
+                if (!displayName.equals(name)
+                    && !displayName.isEmpty()) {
+                    displayName = displayName.substring(
+                        0,
+                        Math.max(0, displayName.length() - 1)
+                    ) + "...";
+                }
+
+                g2.drawString(
+                    displayName,
+                    legendX + 15,
+                    yy + 1
+                );
 
                 g2.setColor(GRAY);
+
+                String percentage = total > 0
+                    ? Math.round(amounts[i] * 100.0 / total) + "%"
+                    : "0%";
+
                 g2.drawString(
-                    amounts[i] + "%",
-                    getWidth() - 35,
+                    percentage,
+                    Math.max(legendX + 15, width - 32),
                     yy + 1
                 );
             }
