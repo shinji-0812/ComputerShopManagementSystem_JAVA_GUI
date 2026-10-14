@@ -55,6 +55,23 @@ public class Database {
                     """
                 );
 
+                statement.executeUpdate(
+                    """
+                    CREATE TABLE IF NOT EXISTS recentHistory (
+                        product_name TEXT NOT NULL,
+                        sale INTEGER NOT NULL DEFAULT 0,
+                        stock INTEGER NOT NULL DEFAULT 0,
+                        new INTEGER NOT NULL DEFAULT 0,
+                        alert INTEGER NOT NULL DEFAULT 0,
+                        stock_number TEXT,
+                        amount REAL DEFAULT 0,
+                        time TEXT NOT NULL,
+                        user_id INTEGER NOT NULL,
+                        FOREIGN KEY(user_id) REFERENCES users(id)
+                    )
+                    """
+                );
+
 
             }
 
@@ -66,6 +83,186 @@ public class Database {
             e.printStackTrace();
         }
     }
+    
+
+
+    public boolean addRecent(
+            String name,
+            int sale,
+            int stock,
+            int new_product,
+            int alert,
+            String stock_number,
+            String time,
+            double amount) {
+
+        int currentUserId = getUserId();
+
+        if (connection == null || currentUserId <= 0) {
+            return false;
+        }
+
+        String insertSql = """
+            INSERT INTO recentHistory
+            (product_name, sale, stock, new, alert,
+            stock_number, amount, time, user_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+        String cleanupSql = """
+            DELETE FROM recentHistory
+            WHERE user_id = ?
+            AND rowid NOT IN (
+                SELECT rowid
+                FROM recentHistory
+                WHERE user_id = ?
+                ORDER BY rowid DESC
+                LIMIT 20
+            )
+            """;
+
+        try {
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement insert =
+                        connection.prepareStatement(insertSql)) {
+
+                insert.setString(1, name);
+                insert.setInt(2, sale);
+                insert.setInt(3, stock);
+                insert.setInt(4, new_product);
+                insert.setInt(5, alert);
+                insert.setString(6, stock_number);
+                insert.setDouble(7, amount);
+                insert.setString(8, time);
+                insert.setInt(9, currentUserId);
+
+                insert.executeUpdate();
+            }
+
+            // FIFO: keep the 20 newest records and remove older ones.
+            try (PreparedStatement cleanup =
+                        connection.prepareStatement(cleanupSql)) {
+
+                cleanup.setInt(1, currentUserId);
+                cleanup.setInt(2, currentUserId);
+                cleanup.executeUpdate();
+            }
+
+            connection.commit();
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException rollbackError) {
+                rollbackError.printStackTrace();
+            }
+
+            e.printStackTrace();
+            return false;
+
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+ 
+    public ArrayList<ActivityRow> getActivityRows() {
+
+        ArrayList<ActivityRow> rows = new ArrayList<>();
+
+        String sql = """
+            SELECT product_name, sale, stock, new, alert,
+                stock_number, amount, time
+            FROM recentHistory
+            WHERE user_id = ?
+            ORDER BY rowid DESC
+            """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            int currentUserId = getUserId();
+
+            if (currentUserId <= 0) {
+                System.err.println("Cannot load activity: no logged-in user.");
+                return rows;
+            }
+
+            statement.setInt(1, currentUserId);
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+
+                    String productName = rs.getString("product_name");
+                    String type;
+                    String description;
+                    String value;
+                    String time = rs.getString("time");
+
+                    if (rs.getInt("sale") == 1) {
+
+                        type = "SALE";
+                        description = "Customer purchase";
+                        value = String.format(
+                            java.util.Locale.US,
+                            "₱%,.2f",
+                            rs.getDouble("amount")
+                        );
+
+                    } else if (rs.getInt("stock") == 1) {
+
+                        type = "STOCK";
+                        description = "Inventory stock updated";
+
+                        String stockNumber = rs.getString("stock_number");
+
+                        value = (stockNumber == null || stockNumber.isBlank())
+                                ? "Updated"
+                                : stockNumber;
+
+                    } else if (rs.getInt("new") == 1) {
+
+                        type = "NEW";
+                        description = "New product added";
+                        value = "Added";
+
+                    } else if (rs.getInt("alert") == 1) {
+
+                        type = "ALERT";
+                        description = "Out-of-stock warning";
+                        value = "Out of Stock";
+
+                    } else {
+                        continue;
+                    }
+
+                    rows.add(new ActivityRow(
+                        type,
+                        productName,
+                        description,
+                        value,
+                        time == null ? "" : time
+                    ));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rows;
+    }
+
+
 
     public ArrayList<Transaction> getSalesHistory() {
         ArrayList<Transaction> salesHistory = new ArrayList<>();
@@ -105,6 +302,28 @@ public class Database {
 
         return salesHistory;
     }
+
+
+
+    public int getTotalProduct() {
+        String sql = "SELECT COUNT(*) FROM products";
+
+        try (PreparedStatement statement =
+                    connection.prepareStatement(sql);
+            ResultSet rs = statement.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+
 
     public double getTotalSales(){
         double totalSales = 0;
@@ -279,6 +498,7 @@ public class Database {
 
         return ordersCount;
     }
+
     
     public java.util.ArrayList<String> getCompletedProductNames() {
 
@@ -493,6 +713,48 @@ public class Database {
         }
     }
 
+
+    public ArrayList<InventoryAlert> getStockAlert() {
+
+        ArrayList<InventoryAlert> alert = new ArrayList<>();
+
+        String sql = """
+            SELECT name, category, quantity
+            FROM products
+            WHERE quantity < 5 AND user_id = ?
+            ORDER BY quantity ASC
+            """;
+
+        try (PreparedStatement statement =
+                connection.prepareStatement(sql)) {
+
+            statement.setInt(1, getUserId());
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+
+                    String name = rs.getString("name");
+                    String category = rs.getString("category");
+                    int quantity = rs.getInt("quantity");
+
+                    boolean outOfStock = quantity == 0;
+
+                    alert.add(new InventoryAlert(
+                        name,
+                        category,
+                        quantity,
+                        outOfStock
+                    ));
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return alert;
+    }
 
     public ArrayList<Product> getProductsByUserId() {
         ArrayList<Product> productList = new ArrayList<>();

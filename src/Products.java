@@ -1,12 +1,16 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 public class Products extends JPanel {
 
-    // COLORS
+    // ==================== COLORS ====================
+
     private final Color BACKGROUND = new Color(0x0F172A);
     private final Color PANEL = new Color(0x111C3D);
     private final Color HEADER = new Color(0x0B1026);
@@ -27,6 +31,11 @@ public class Products extends JPanel {
     private JTextField searchField;
     private JComboBox<String> categoryBox;
 
+    private static final DateTimeFormatter ACTIVITY_FORMAT =
+            DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
+
+    // ==================== CONSTRUCTOR ====================
+
     public Products(Database db) {
         this.db = db;
 
@@ -34,7 +43,7 @@ public class Products extends JPanel {
         setLayout(new BorderLayout(0, 16));
         setBorder(new EmptyBorder(25, 25, 25, 25));
 
-        // Load the logged-in user's products.
+        // Load products belonging to the logged-in user.
         products.addAll(db.getProductsByUserId());
 
         // ==================== TOP SECTION ====================
@@ -78,6 +87,7 @@ public class Products extends JPanel {
         tools.setOpaque(false);
 
         // SEARCH FIELD
+
         searchField = new JTextField("Search products...");
         searchField.setForeground(GRAY);
         searchField.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -92,6 +102,7 @@ public class Products extends JPanel {
                                 8, 12, 8, 12)));
 
         searchField.addFocusListener(new FocusAdapter() {
+
             @Override
             public void focusGained(FocusEvent e) {
                 if (searchField.getText().equals("Search products...")) {
@@ -134,6 +145,7 @@ public class Products extends JPanel {
         tools.add(searchField, BorderLayout.CENTER);
 
         // CATEGORY FILTER
+
         categoryBox = new JComboBox<>(new String[]{
                 "All Categories",
                 "Keyboard",
@@ -157,6 +169,7 @@ public class Products extends JPanel {
                 BorderFactory.createLineBorder(BORDER));
 
         categoryBox.setRenderer(new DefaultListCellRenderer() {
+
             @Override
             public Component getListCellRendererComponent(
                     JList<?> list,
@@ -170,8 +183,12 @@ public class Products extends JPanel {
 
                 setFont(new Font("Segoe UI", Font.PLAIN, 13));
                 setBorder(new EmptyBorder(7, 10, 7, 10));
+
                 setBackground(
-                        isSelected ? new Color(0x1E1B4B) : PANEL);
+                        isSelected
+                                ? new Color(0x1E1B4B)
+                                : PANEL);
+
                 setForeground(isSelected ? CYAN : WHITE);
 
                 return this;
@@ -230,14 +247,50 @@ public class Products extends JPanel {
         refreshCards();
     }
 
+    // ==================== ACTIVITY TIME ====================
+
+    private String getActivityTime() {
+        return LocalDateTime.now().format(ACTIVITY_FORMAT);
+    }
+
+    
+
+    private void saveRecentActivity(
+            String name,
+            int sale,
+            int stock,
+            int newProduct,
+            int alert,
+            String stockNumber,
+            double amount) {
+
+        boolean saved = db.addRecent(
+                name,
+                sale,
+                stock,
+                newProduct,
+                alert,
+                stockNumber,
+                getActivityTime(),
+                amount
+        );
+
+        if (!saved) {
+            System.err.println(
+                    "Failed to save recent activity for: " + name);
+        }
+    }
+
     // ==================== REFRESH PRODUCTS ====================
 
     private void refreshCards() {
+
         if (searchField == null || categoryBox == null) {
             return;
         }
 
         cardsPanel.removeAll();
+        cardsPanel.setLayout(new GridLayout(0, 3, 16, 16));
 
         String search = searchField.getText()
                 .trim()
@@ -255,8 +308,7 @@ public class Products extends JPanel {
 
         int count = 0;
 
-        for (int i = 0; i < products.size(); i++) {
-            Product product = products.get(i);
+        for (Product product : products) {
 
             boolean matchesSearch =
                     product.name.toLowerCase().contains(search)
@@ -273,6 +325,7 @@ public class Products extends JPanel {
         }
 
         if (count == 0) {
+
             cardsPanel.setLayout(new BorderLayout());
 
             JPanel empty = new JPanel(new GridBagLayout());
@@ -284,10 +337,6 @@ public class Products extends JPanel {
 
             empty.add(message);
             cardsPanel.add(empty, BorderLayout.CENTER);
-
-        } else {
-            cardsPanel.setLayout(
-                    new GridLayout(0, 3, 16, 16));
         }
 
         cardsPanel.revalidate();
@@ -297,6 +346,7 @@ public class Products extends JPanel {
     // ==================== PRODUCT CARD ====================
 
     private JPanel createProductCard(Product product) {
+
         JPanel card = new JPanel(new BorderLayout(0, 13));
         card.setBackground(PANEL);
 
@@ -308,6 +358,7 @@ public class Products extends JPanel {
         card.setPreferredSize(new Dimension(220, 225));
 
         // PRODUCT HEADER
+
         JPanel top = new JPanel(new BorderLayout(8, 8));
         top.setOpaque(false);
 
@@ -351,6 +402,7 @@ public class Products extends JPanel {
         card.add(top, BorderLayout.NORTH);
 
         // PRODUCT DETAILS
+
         JPanel details = new JPanel(new GridLayout(3, 1, 0, 8));
         details.setOpaque(false);
 
@@ -373,7 +425,7 @@ public class Products extends JPanel {
         status.setForeground(
                 product.stock == 0
                         ? RED
-                        : product.stock <= 10
+                        : product.stock <= 5
                                 ? ORANGE
                                 : GREEN);
 
@@ -384,6 +436,7 @@ public class Products extends JPanel {
         card.add(details, BorderLayout.CENTER);
 
         // EDIT AND DELETE BUTTONS
+
         JPanel actions = new JPanel(new GridLayout(1, 2, 10, 0));
         actions.setOpaque(false);
 
@@ -429,6 +482,7 @@ public class Products extends JPanel {
     // ==================== CATEGORY ICONS ====================
 
     private String iconFor(String category) {
+
         switch (category) {
             case "Keyboard":
                 return "⌨";
@@ -458,11 +512,12 @@ public class Products extends JPanel {
     }
 
     private String getStatus(int stock) {
+
         if (stock == 0) {
             return "Out of Stock";
         }
 
-        if (stock <= 10) {
+        if (stock <= 5) {
             return "Low Stock";
         }
 
@@ -472,6 +527,7 @@ public class Products extends JPanel {
     // ==================== DELETE PRODUCT ====================
 
     private void deleteProduct(int index) {
+
         if (index < 0 || index >= products.size()) {
             return;
         }
@@ -493,10 +549,12 @@ public class Products extends JPanel {
         boolean success = db.deleteProduct(product.name);
 
         if (success) {
+
             products.remove(index);
             refreshCards();
 
         } else {
+
             JOptionPane.showMessageDialog(
                     this,
                     "Failed to delete product.",
@@ -508,6 +566,7 @@ public class Products extends JPanel {
     // ==================== ADD / EDIT PRODUCT ====================
 
     private void showProductDialog(int index) {
+
         boolean editing = index >= 0 && index < products.size();
 
         JDialog dialog = new JDialog(
@@ -559,8 +618,10 @@ public class Products extends JPanel {
         categoryField.setPreferredSize(
                 new Dimension(180, 38));
 
-        // Fill the form when editing.
+        // Fill form when editing.
+
         if (editing) {
+
             Product product = products.get(index);
 
             nameField.setText(product.name);
@@ -575,6 +636,7 @@ public class Products extends JPanel {
         addFormRow(panel, gbc, 3, "Stock Quantity", stockField);
 
         // FORM BUTTONS
+
         JPanel buttons = new JPanel(
                 new FlowLayout(FlowLayout.RIGHT, 8, 0));
 
@@ -590,7 +652,6 @@ public class Products extends JPanel {
 
         cancel.addActionListener(e -> dialog.dispose());
 
-        // IMPORTANT: One database insert per new product.
         save.addActionListener(e -> {
 
             String name = nameField.getText().trim();
@@ -618,6 +679,7 @@ public class Products extends JPanel {
             }
 
             try {
+
                 double price = Double.parseDouble(priceText);
                 int stock = Integer.parseInt(stockText);
 
@@ -632,15 +694,17 @@ public class Products extends JPanel {
                     return;
                 }
 
+                // ==================== ADD PRODUCT ====================
+
                 if (!editing) {
 
-                    // Check for a duplicate before inserting.
                     boolean duplicate = products.stream().anyMatch(p ->
                             p.name.equalsIgnoreCase(name)
                             && p.category.equalsIgnoreCase(
                                     selectedCategory));
 
                     if (duplicate) {
+
                         JOptionPane.showMessageDialog(
                                 dialog,
                                 "This product already exists.");
@@ -648,25 +712,40 @@ public class Products extends JPanel {
                         return;
                     }
 
-                    // FIX: Call addProduct only ONCE.
+                    
                     db.addProduct(
                             name,
                             selectedCategory,
                             price,
                             stock);
 
+                    
                     products.add(new Product(
                             name,
                             selectedCategory,
                             price,
                             stock));
 
+                    
+                    saveRecentActivity(
+                            name,
+                            0,                         
+                            0,                          
+                            1,                          
+                            stock == 0 ? 1 : 0,         
+                            String.valueOf(stock),      
+                            0.0                         
+                    );
+
                 } else {
 
-                    Product oldProduct = products.get(index);
-                    String oldName = oldProduct.name;
+                    // ==================== EDIT PRODUCT ====================
 
-                    // Prevent duplicates when editing.
+                    Product oldProduct = products.get(index);
+
+                    String oldName = oldProduct.name;
+                    int oldStock = oldProduct.stock;
+
                     boolean duplicate = products.stream().anyMatch(p ->
                             p != oldProduct
                             && p.name.equalsIgnoreCase(name)
@@ -674,6 +753,7 @@ public class Products extends JPanel {
                                     selectedCategory));
 
                     if (duplicate) {
+
                         JOptionPane.showMessageDialog(
                                 dialog,
                                 "This product already exists.");
@@ -689,6 +769,7 @@ public class Products extends JPanel {
                             stock);
 
                     if (!success) {
+
                         JOptionPane.showMessageDialog(
                                 dialog,
                                 "Failed to update product. Please try again.");
@@ -696,17 +777,51 @@ public class Products extends JPanel {
                         return;
                     }
 
+                    // Update local product list.
                     products.set(index, new Product(
                             name,
                             selectedCategory,
                             price,
                             stock));
+
+                    // Record the actual stock difference.
+                    int difference = stock - oldStock;
+
+                    if (difference > 0) {
+
+                        // Stock increased.
+                        saveRecentActivity(
+                                name,
+                                0,                      
+                                1,                      
+                                0,                      
+                                stock == 0 ? 1 : 0,     
+                                "+" + difference,       
+                                0.0
+                        );
+
+                    } else if (difference < 0) {
+
+                        // Stock decreased.
+                        saveRecentActivity(
+                                name,
+                                0,                      // Sale
+                                1,                      // Stock event flag
+                                0,                      // New product
+                                stock == 0 ? 1 : 0,     // Alert
+                                String.valueOf(difference),
+                                0.0
+                        );
+                    }
+
+                    
                 }
 
                 refreshCards();
                 dialog.dispose();
 
             } catch (NumberFormatException ex) {
+
                 JOptionPane.showMessageDialog(
                         dialog,
                         "Price must be a valid number and stock must be a whole number.");
@@ -719,6 +834,7 @@ public class Products extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.gridwidth = 2;
+
         panel.add(buttons, gbc);
 
         dialog.setContentPane(panel);
@@ -728,6 +844,7 @@ public class Products extends JPanel {
     // ==================== IMAGE RESIZING ====================
 
     private Image resize(ImageIcon icon) {
+
         Image image = icon.getImage();
 
         return image.getScaledInstance(
@@ -765,6 +882,7 @@ public class Products extends JPanel {
     }
 
     private void styleInput(JTextField field) {
+
         field.setBackground(HEADER);
         field.setForeground(WHITE);
         field.setCaretColor(CYAN);
@@ -778,6 +896,7 @@ public class Products extends JPanel {
     }
 
     private void stylePrimaryButton(JButton button) {
+
         button.setBackground(CYAN);
         button.setForeground(new Color(0x0F172A));
         button.setFont(new Font("Arial", Font.BOLD, 13));

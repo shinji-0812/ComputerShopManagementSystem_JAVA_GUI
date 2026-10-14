@@ -166,7 +166,7 @@ public class Login extends JFrame {
 
         if (original.getIconWidth() > 0) {
             Image resized = original.getImage().getScaledInstance(
-                155, 155, Image.SCALE_SMOOTH
+                225, 225, Image.SCALE_SMOOTH
             );
 
             imageLabel = new JLabel(new ImageIcon(resized));

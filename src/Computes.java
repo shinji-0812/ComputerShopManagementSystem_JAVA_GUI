@@ -5,14 +5,12 @@ public class Computes {
 
     private final Database db;
 
-
     public double totalSales = 0;
     public double averageSales = 0;
 
     public int completedOrders = 0;
     public int productsSold = 0;
     public int canceledOrders = 0;
-
 
     public String[] productNames = {
         "Keyboard",
@@ -28,12 +26,8 @@ public class Computes {
         "Case"
     };
 
-
     public double[] productSales = new double[11];
-
-
     public int[] finalProductSales = new int[11];
-
 
     public int[] topProducts = new int[4];
     public int[] topfour = new int[4];
@@ -41,8 +35,12 @@ public class Computes {
 
     public Computes(Database db) {
         this.db = db;
+        compute();
     }
 
+    // =====================================================
+    // COMPUTE SALES AND ORDER STATISTICS
+    // =====================================================
 
     public void compute() {
 
@@ -54,21 +52,17 @@ public class Computes {
         productsSold = db.productSold();
 
         averageSales = completedOrders > 0
-            ? totalSales / completedOrders
-            : 0;
+                ? totalSales / completedOrders
+                : 0;
 
         productSales = new double[productNames.length];
         finalProductSales = new int[productNames.length];
 
-
         for (int i = 0; i < productNames.length; i++) {
-            productSales[i] =
-                db.getProductSales(productNames[i]);
+            productSales[i] = db.getProductSales(productNames[i]);
         }
 
-
         for (int i = 0; i < productSales.length; i++) {
-
             if (totalSales > 0) {
                 finalProductSales[i] = (int) Math.round(
                     productSales[i] / totalSales * 100.0
@@ -79,12 +73,14 @@ public class Computes {
         }
     }
 
+    // =====================================================
+    // TOP-SELLING PRODUCTS
+    // =====================================================
 
     public void topSellingProducts() {
 
         ArrayList<String> names = db.getCompletedProductNames();
 
-   
         topfour = new int[4];
         topfourNames = new String[4];
 
@@ -93,7 +89,6 @@ public class Computes {
         int[] quantities = new int[size];
         boolean[] selected = new boolean[size];
 
-
         for (int i = 0; i < size; i++) {
             quantities[i] = db.getTopSellingProducts(
                 "Completed",
@@ -101,28 +96,21 @@ public class Computes {
             );
         }
 
-
         for (int rank = 0; rank < 4; rank++) {
 
             int maxIndex = -1;
 
             for (int i = 0; i < size; i++) {
 
-                if (selected[i]) {
-                    continue;
-                }
-
-                if (quantities[i] <= 0) {
+                if (selected[i] || quantities[i] <= 0) {
                     continue;
                 }
 
                 if (maxIndex == -1 ||
                     quantities[i] > quantities[maxIndex]) {
-
                     maxIndex = i;
                 }
             }
-
 
             if (maxIndex == -1) {
                 break;

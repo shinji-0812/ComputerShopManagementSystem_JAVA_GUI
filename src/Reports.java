@@ -55,9 +55,7 @@ public class Reports extends JPanel {
         main.setBorder(new EmptyBorder(16, 16, 16, 16));
         main.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // =====================================
-        // SUMMARY CARDS
-        // =====================================
+
 
         summary = new JPanel(new GridLayout(1, 4, 12, 12));
         summary.setOpaque(false);
@@ -110,9 +108,7 @@ public class Reports extends JPanel {
         main.add(summary);
         main.add(Box.createVerticalStrut(18));
 
-        // =====================================
-        // SALES BY CATEGORY
-        // =====================================
+
 
         categoryPanel = createPanel("Sales by Category");
 
@@ -149,7 +145,8 @@ public class Reports extends JPanel {
 
         boolean hasTopProducts = false;
 
-        for (int i = 0; i < compute.topfour.length; i++) {
+        // CHANGED: DISPLAY ONLY THE TOP 3 PRODUCTS
+        for (int i = 0; i < Math.min(3, compute.topfour.length); i++) {
 
             String productName = compute.topfourNames[i];
             int quantity = compute.topfour[i];
@@ -225,9 +222,7 @@ public class Reports extends JPanel {
 
         main.add(bottom);
 
-        // =====================================
-        // SCROLL PANE
-        // =====================================
+
 
         scroll = new JScrollPane(main);
 
@@ -357,8 +352,6 @@ public class Reports extends JPanel {
         summary.setMaximumSize(
             new Dimension(Integer.MAX_VALUE, summaryHeight)
         );
-
-
 
         boolean stackPanels = contentWidth < 700;
 
@@ -622,8 +615,6 @@ public class Reports extends JPanel {
                 g2.dispose();
                 return;
             }
-
-
 
             long total = 0;
 

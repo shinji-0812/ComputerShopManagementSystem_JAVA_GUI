@@ -4,6 +4,12 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.ArrayList;
 
 public class settings extends JDialog {
 
@@ -385,6 +391,26 @@ public class settings extends JDialog {
 
             if (admin != null) {
                 admin.changename(username);
+                Path path = Paths.get("src/Account.txt");
+
+                try {
+                    List<String> lines = Files.readAllLines(path);
+
+                    for (int i = 0; i < lines.size(); i++) {
+                        String[] parts = lines.get(i).split("=", 2);
+
+                        if (parts.length == 2 && parts[0].equals("username")) {
+                            lines.set(i, "username=" + username);
+                        }
+                    }
+
+                    Files.write(path, lines);
+
+                    System.out.println("Username updated!");
+
+                } catch (IOException e) {
+                    System.out.println("Error: " + e.getMessage());
+                }
             }
 
             showMessage("Username updated successfully!", true);
